@@ -1,0 +1,383 @@
+### 递归
+
+#### 树的遍历
+
+[二叉树]的遍历分为以下三种：
+
+先序遍历：遍历顺序规则为**【根左右】**
+
+中序遍历：遍历顺序规则为【**左根右】**
+
+后序遍历：遍历顺序规则为**【左右根】**
+
+给出任意两种包含中序遍历的遍历序列都能构造出一颗唯一的二叉树
+
+递归的本质是**数学归纳法**
+
+分析步骤：
+
+1. 先找到后序遍历的最后一个节点必然是根节点
+
+2. 由于权值不同，则在中序遍历序列中可以找到这个根节点
+
+3. 根节点的左边为左子树的中序遍历
+
+4. 根节点的右边为左子树的后序遍历
+
+5. 后序遍历中左子树的后序遍历和左子树的中序遍历的元素个数相同则可在后序遍历中找到左右子树的分界点
+
+6. 分界点的左边包括分界点为左子树的后序遍历，分界点的右边不包括分界点为右子树的后序遍历
+
+7. 递归构建左子树
+
+8. 递归构建右子树
+
+   
+
+   ![image-20230223192231066](C:\Users\lph\AppData\Roaming\Typora\typora-user-images\image-20230223192231066.png)
+
+```C++
+#include <iostream>
+#include <vector>
+
+using namespace std;
+
+const int N = 35;
+
+vector<int> level[N]; // 每一层有一个vector数组，每遍历一层都将该层元素从前往后加入进去
+
+int a[N], b[N]; // a[i]后序遍历 b[i]中序遍历
+int p[N]; // 用于存贮中序遍历中每一个元素的位置
+
+// build(后序遍历的开始位置， 结束位置， 中序遍历的开始位置， 结束位置，当前层数)
+void build(int al, int ar, int bl, int br, int d) {
+    if (al > ar) return; // 递归出口 al<=ar说明还未遍历完
+    int val = a[ar]; // 记录根节点
+    level[d].push_back(val); // 每一层都要一次加入level中 每一层元素都是自己子树的一个根节点
+    int k = p[val]; // 中序遍历根节点的位置
+    
+    build(al, al + k - 1 - bl, bl, k - 1, d + 1); // 递归遍历左子树 左中长度应等于左后长度 即 k-1-bl=x-al x=al+k-1-bl
+    build(al + k - bl, ar - 1, k + 1, br, d + 1); // 递归遍历右子树 后续遍历右子树不应包括根节点
+}
+
+int main() {
+    int n;
+    cin >> n;
+    for (int i = 0; i < n; i ++) cin >> a[i];
+    for (int i = 0; i < n; i ++) cin >> b[i];
+    for (int i = 0; i < n; i ++) p[b[i]] = i; // 记录中序遍历每一个元素的位置
+    
+    build(0, n - 1, 0, n - 1, 0); // 同过中序遍历和后序遍历构造出一颗二叉树
+    
+    // 输出记录在level数组中的每一个元素，即为层序遍历顺序
+    for (int i = 0; i < n; i ++) 
+        for (int x: level[i]) 
+            cout << x << " ";
+    
+    return 0;
+}
+```
+
+### 并查集
+
+![image-20230224145130985](C:\Users\lph\AppData\Roaming\Typora\typora-user-images\image-20230224145130985.png)
+
+并查集优化：路径压缩，在求集合编号时，就把路径上的所有点指向根节点，优化后并查集的效率**接近**于O(1)
+
+#### 合并集合
+
+```C++
+#include <iostream>
+using namespace std;
+
+const int N = 100010;
+
+int n, m;
+int p[N]; // 祖先节点
+
+int find(int x) { // 寻找x的祖先节点 + 路径压缩
+    if (p[x] != x) p[x] = find(p[x]); // 如果不是祖先节点，就找祖先节点的祖先节点，之后返回祖先节点，将路径上的每个节点的祖先节点都设置为x祖先节点
+    return p[x];
+}
+
+int main() {
+    scanf("%d%d", &n, &m);
+    
+    for (int i = 1; i <= n; i ++) p[i] = i; // 并查集初始化 每一个元素都是自己的父节点
+    
+    while(m --) {
+        int x, y;
+        char op[2];
+        scanf("%s%d%d", op, &x, &y);
+        
+        if (op[0] == 'M') { // 合并集合
+            p[find(x)] = find(y); // 将x祖先节点的祖先节点设为y的祖先节点
+        } else {
+            if (find(x) != find(y)) printf("No\n");
+            else printf("Yes\n");
+        }
+    }
+    
+    return 0;
+}
+```
+
+#### 连通节点的数量
+
+并查集中需要维护各个集合元素个数的情况
+
+```C++
+#include <iostream>
+using namespace std;
+
+const int N = 100010;
+
+int p[N], Size[N]; // p维护节点祖先 size维护同一集合中元素个数
+
+int n, m;
+
+// 查询操作 并查集中最重要的操作
+int find(int x) {
+    if (p[x] != x) p[x] = find(p[x]);
+    return p[x];
+}
+
+int main() {
+    scanf("%d%d", &n, &m);
+    for (int i = 1; i <= n; i ++) {
+        p[i] = i; // 初始时所有元素祖先都是自己
+        Size[i] = 1; // 所有集合的元素个数都为1个
+    }
+    
+    while (m --) {
+        char op[5];
+        int x, y;
+        
+        scanf("%s", op);
+        
+        if (op[0] == 'C') { // 合并两个集合
+            scanf("%d%d", &x, &y);
+            if (find(x) == find(y)) continue; // 判断是否在同一个集合
+            Size[find(y)] += Size[find(x)]; 
+            p[find(x)] = find(y);
+            
+        } else if (op[1] == '1') {
+            scanf("%d%d", &x, &y);
+            if (find(x) == find(y)) printf("Yes\n");
+            else printf("No\n");
+            
+        } else {
+            scanf("%d", &x);
+            printf("%d\n", Size[find(x)]); // 只有祖先节点的size是有效的，表示该集合节点的数量
+            
+        }
+    }
+    return 0;
+}
+```
+
+#### 亲戚
+
+```C++
+#include <iostream>
+using namespace std;
+
+const int N = 20010;
+
+int n, m, k;
+int p[N];
+
+int find(int x) {
+    if (p[x] != x) p[x] = find(p[x]);  
+    return p[x];
+}
+
+int main() {
+    scanf("%d%d", &n, &m);
+    for (int i = 1; i <= n; i ++) p[i] = i; // 初始化
+    
+    while (m --) {
+        int x, y;
+        scanf ("%d%d", &x, &y);
+        p[find(x)] = find(y); // 将x集合挂到y上
+    }
+    
+    scanf("%d", &k);
+    while (k --) {
+        int a, b;
+        scanf("%d%d", &a, &b);
+        if (find(a) == find(b)) printf("Yes\n");
+        else printf("No\n");
+    }
+    
+    return 0;
+}
+```
+
+### 哈希表
+
+#### 模拟哈希表
+
+1. 开放寻址法
+
+```C++
+#include <iostream>
+#include <cstring>
+
+using namespace std;
+
+const int N = 200003;
+
+int h[N]; // 数组模拟哈希表
+int null = 0x3f3f3f3f; // 选取一个不在数据范围内的值作为空标记
+int n;
+
+int find(int x) {
+    int k = (x % N + N) % N; // 在C++中负数的模等于负数，应该取模加N再取模
+    while (h[k] != null && h[k] != x) {  // 如果该位置不为空并且该位置不为x 则应该往前找
+         k ++;
+         if (k == N) k = 0; // 如果k超过数组范围则应继续从第一个位置开始寻找
+    }
+    
+    return k; // 否则返回该元素的位置
+}
+
+int main() {
+    scanf("%d", &n);
+    memset(h, 0x3f, sizeof h);
+    while (n --) {
+        int op[2], x;
+        scanf("%s%d", op, &x);
+        int k = find(x);
+        if(op[0] == 'I') { // 插入一个数
+            h[k] = x;
+        } else { // 查询是否存在
+            if (h[k] != null) puts("Yes");
+            else puts("No");
+        }
+    }
+    return 0;
+}
+```
+
+#### 笨拙的手指
+
+```C++
+#include <iostream>
+#include <cstring>
+#include <unordered_set>
+
+using namespace std;
+
+int base(string s, int n) { // 将n进制数x转换为十进制
+    int res = 0;
+    for (auto x: s) 
+        res = res * n + x - '0'; // 字符转化为整数-'0'
+    return res;
+}
+
+
+int main() {
+    string a, b;
+    cin >> a >> b;
+    
+    unordered_set<int> hash; // 创建哈希表
+    
+    for (int i = 0; i < a.size(); i ++) {
+        string s = a;
+        s[i] ^= 1; // 0变1 1变0
+        if (s[0] == '0' && s.size() > 1) continue;
+        hash.insert(base(s, 2));
+    }
+    
+    for (int i = 0; i < b.size(); i ++) // 枚举每一位
+        for(int j = 0; j < 3; j ++) { // 枚举可能写错的值
+            if (b[i] - '0' != j) { // 如果不是0、1、2 则转换为0、1、2 (写错)
+                string s = b;
+                s[i] = j + '0'; // 整数转化为字符+'0'
+                if (s[0] == '0' && s.size() > 1) continue;
+                int n = base(s, 3);
+                if (hash.count(n)) // 如果n存在则一定是结果
+                    cout << n << endl;
+            }
+        }
+    return 0;
+}
+```
+
+### 字符串哈希
+
+```C++
+#include <iostream>
+using namespace std;
+typedef unsigned long long ULL;
+
+const int N = 100010, P = 131; // P取131冲突概率很小
+
+char str[N];
+int h[N]; // 存放字符串哈希值
+int p[N]; // 存放p^n
+
+int n, m;
+
+ULL getHash (int l, int r) {
+    return h[r] - h[l - 1] * p[r - l + 1]; // 将低位*P^r-l+1和高位对齐，再相减，得到h[l~r]的哈希值
+}
+
+int main() {
+    scanf ("%d%d%s", &n, &m, str + 1); // 字符串从1开始,要保证从1开始取哈希值
+    
+    p[0] = 1; // p^0 = 1
+    for (int i = 1; i <= n; i ++) {
+        p[i] = p[i - 1] * P;
+        h[i] = h[i - 1] * P + str[i]; // 将字符串转换为P进制
+    }
+    
+    while (m --) {
+        int l1, r1, l2, r2;
+        scanf ("%d%d%d%d", &l1, &r1, &l2, &r2);
+        if (getHash(l1, r1) == getHash(l2, r2)) 
+            puts ("Yes");
+        else puts ("No");
+    }
+}	
+```
+
+### KMP算法
+
+next数组含义：最大的使前后缀相等的元素个数
+
+```C++
+#include <iostream>
+using namespace std;
+
+const int M = 1000010, N = 100010;
+
+char p[M]; // 原串
+char s[N]; // 模式串
+int next[N];
+int n, m;
+
+int main() {
+	scanf ("%d%s", &n, s + 1);
+	scanf ("%d%s", &m, p + 1);
+	
+	// 求next数组过程
+	for (int i = 2, j = 0; i <= n; i ++) {
+		while (j && s[i] != s[j + 1]) j = next[j] // j没有退到0或者匹配失败
+		if (s[i] == s[j + 1]) j ++; // 匹配成功j向前移动
+		next[i] = j;
+	}
+	
+	// kmp匹配过程
+	for (int i = 0, j = 1; i <= m; i ++) { // i, j始终错一位
+		while (j && p[i] != s[j + 1]) j = next[j]; // j没有退回0或匹配失败
+		if (p[i] == s[j + 1]) j ++; // 匹配成功j向前
+		if (j == n) { // j走到终点
+			printf ("%d", i - n); // 输出开始位置
+			j = next[j]; // j向后退 继续寻找
+		}
+	}
+	return 0;
+}
+```
