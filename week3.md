@@ -501,3 +501,70 @@ int main() {
     return 0;
 }
 ```
+#### 八数码
+
+一维坐标转二维坐标 ：`X = x / 矩阵阶数 Y = y / 矩阵阶数` ***（x,y是一维下标， X,Y是二维下标）***
+```C++
+#include <iostream>
+#include <algorithm>
+#include <unordered_map>
+#include <queue>
+
+using namespace std;
+
+int bfs(string start) {
+    queue<string> q; // bfs队列
+    unordered_map<string, int> d;  // 记录当前点与起点的距离
+    
+    string end = "12345678x"; // 定义结束状态
+    
+    // 初始化队列与list
+    q.push(start); // 将起点压入队列中
+    d[start] = 0; // 起点距离起点距离为0
+    
+    while (!q.empty()) { // 队列不为空时
+        auto t = q.front(); // 取出队头
+        q.pop(); // 队头弹出
+        
+        int distance = d[t]; // 取出当前对头的距离
+        if (t == end) return distance; // 队头为结束状态 直接返回
+        
+        // 状态转移
+        int k = t.find("x"); // x在一维数组中的位置
+        
+        int x = k / 3, y = k % 3; // 转化为二维数组中的下标
+        
+        int dx[4] = {1, 0, -1, 0}, dy[4] = {0, -1, 0, 1};
+        
+        for (int i = 0; i < 4; i ++) { // 遍历上下左右四个方向
+            int a = x + dx[i], b = y + dy[i];
+            
+            if (a >= 0 && a < 3 && b >= 0 && b < 3) { // 没有越界
+                swap(t[k], t[3 * a + b]); // 交换两个数的位置 
+                
+                if (!d.count(t)) { // 如果这个点之前没有被搜到
+                    d[t] = distance + 1; // 交换后t这个字符串进行的操作次数+1
+                    q.push(t); // 将新字符串加入队列
+                }
+                
+                swap(t[k], t[3 * a + b]); // 将两个数的位置交换回来
+            }
+        }
+    }
+    
+    return -1; // 不存在解决方案
+}
+
+int main() {
+    string start; // 初始状态
+    for (int i = 0; i < 9; i ++) {
+        char c;
+        cin >> c;
+        start += c;
+    }
+    
+    cout <<bfs(start) <<endl;
+    
+    return 0;
+}
+```
