@@ -1,5 +1,3 @@
-# 算法基础课
-
 ## 做题思路
 
 ```C++
@@ -33,8 +31,8 @@ for(int i = 0; i < PAT.size(); ++i) {
 
 重要公式：
 
-1. 初始化前缀和数组 s[i] = s[i - 1] + a[i];
-2. 查询数组中任意两个下标之间数的和： s[r] - s[l - 1]
+1. 初始化前缀和数组 `s[i] = s[i - 1] + a[i];`
+2. 查询数组中任意两个下标之间数的和： `s[r] - s[l - 1]`
 
 ```c++
 #include <iostream>
@@ -106,11 +104,7 @@ int main () {
 
 求解前缀和公式：`s[i][j] = s[i - 1][j] + s[i][j - 1] - s[i - 1][j - 1] + a[i][j]`
 
-![image-20230226171002146](C:\Users\lph\AppData\Roaming\Typora\typora-user-images\image-20230226171002146.png)
-
 求解任意两坐标(x1, y1) ~ (x2, y2)之间的元素之和：`s[x2][y2] - s[x1 - 1][y2] - s[x2][y1 - 1] + s[x1 - 1][y1 - 1]`
-
-![image-20230226171810568](C:\Users\lph\AppData\Roaming\Typora\typora-user-images\image-20230226171810568.png)
 
 ```C++
 #include <iostream>
@@ -185,7 +179,7 @@ int main() {
 
 #### 改变数组元素
 
-始终只有一种操作—插入
+始终只有一种操作—**插入**
 
 输入元素也看成是插入，则差分数组自动构建
 
@@ -235,9 +229,9 @@ int main() {
 
 有两种模板
 
-当让r=mid时mid=(l+r)/2
+**当让r=mid时mid=(l+r)/2**
 
-当让l=mid时mid=(l+r)/2+1
+**当让l=mid时mid=(l+r)/2+1**
 
 ```C++
 // 整数二分算法模板
