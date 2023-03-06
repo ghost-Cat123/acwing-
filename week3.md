@@ -2,8 +2,6 @@
 
 高效的**存储**或**查找**字符串集合的数据结构
 
-![image-20230227155639438](C:\Users\lph\AppData\Roaming\Typora\typora-user-images\image-20230227155639438.png)
-
 ```c++
 #include <iostream>
 using namespace std;
@@ -191,8 +189,6 @@ int main() {
 |   BFS    |    queue     |   O(2^h)   |  具有最短路性质  |
 
 ### DFS
-
-![image-20230302193058951](C:\Users\lph\AppData\Roaming\Typora\typora-user-images\image-20230302193058951.png)
 
 #### 全排列问题
 
