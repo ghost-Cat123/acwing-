@@ -568,3 +568,118 @@ int main() {
     return 0;
 }
 ```
+### 图论
+
+树可以看作是一种特殊的图， 有向无环图
+
+图有两种存储方式：**邻接表**和**邻接矩阵**
+
+##### 图的搜索与建立模板
+``` C++
+#include <iostream>
+#include <cstring>
+#include <algorithm>
+using namepase std;
+
+const int N = 100010, M = 2 * N;
+
+int h[N]; // 存储n个链表的链表头
+int e[M]; // 表示每个节点的值
+int ne[M]; // 表示每个节点的next指针
+int idx;
+bool st[N]; // 记录是否被搜索过
+
+void bfs(int u) {
+    st[u] = true; // 标记u已经被搜索过了
+    
+    for (int i = h[u]; i != -1; i = ne[i]) { // 没有到空节点 就继续遍历
+        int j = e[i]; // 记录该点的值
+        if (!st[j]) bfs(j); // 递归搜索该点
+    }
+}
+
+int add(int a, int b) { // 插入一条a到b的边
+    // 先赋值
+    e[idx] = b;
+    // 再连接
+    ne[idx] = h[a];
+    h[a] = idx ++;
+}
+
+int main() {
+    // 邻接表的初始化
+    memset(h, -1, sizeof h); // 将每个头节点都指向-1
+    
+    bfs(1); 
+}
+```
+
+##### 树的重心
+```C++
+#include <iostream>
+#include <cstring>
+#include <algorithm>
+using namespace std;
+
+const int N = 100010, M = 2 * N;
+
+int n;
+int h[N]; // 存储n个链表的链表头
+int e[M]; // 表示每个节点的值
+int ne[M]; // 表示每个节点的next指针
+int idx;
+bool st[N]; // 记录是否被搜索过
+int ans = N; // 存储最终答案 最小的最大值
+
+// 返回以u为根的子树中节点的数量
+int bfs(int u) {
+    st[u] = true; // 标记u已经被搜索过了
+    
+    int sum = 1; // 当前子树的大小 包括自己
+    int res = 0; // 删除该点后每一个连通块中节点数量的最大值
+    
+    for (int i = h[u]; i != -1; i = ne[i]) { // 没有到空节点 就继续遍历
+        int j = e[i]; // 记录该点的值
+        if (!st[j]) {
+            int s = bfs(j); // 递归搜索该点 s为以j为根节点子树的大小
+            res = max(res, s);
+            sum += s;
+        }
+    }
+    
+    // 与剩下的连通块数量取最大值
+    res = max(res, n - sum);
+    
+    // 和答案取最小值
+    ans = min(ans, res);
+    
+    return sum;
+}
+
+void add(int a, int b) { // 插入一条a到b的边
+    // 先赋值
+    e[idx] = b;
+    // 再连接
+    ne[idx] = h[a];
+    h[a] = idx ++;
+}
+
+int main() {
+    cin >> n;
+
+    // 邻接表的初始化
+    memset(h, -1, sizeof h); // 将每个头节点都指向-1
+    
+    for (int i = 0; i < n - 1; i ++) {
+        int a, b;
+        cin >> a >> b;
+        add(a, b), add(b, a); // 无向图要加两条想向的边
+    }
+    
+    bfs(1); 
+    
+    cout << ans <<endl;
+    
+    return 0;
+}
+````
