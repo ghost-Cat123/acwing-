@@ -240,7 +240,7 @@ int main() {
 
 使用3个bool变量进行不可行解的判断 (剪枝)
 
-```
+```C++
 #include <iostream>
 using namespace std;
 
