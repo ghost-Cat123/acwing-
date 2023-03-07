@@ -683,3 +683,190 @@ int main() {
     return 0;
 }
 ````
+##### 图中点的层次（图的BFS）
+```C++
+#include <iostream>
+#include <algorithm>
+#include <cstring>
+
+using namespace std;
+
+const int N = 100010;
+
+int n, m;
+
+int h[N], e[N], ne[N], idx;
+
+int d[N], q[N];
+
+int add(int a, int b) {
+    e[idx] = b, ne[idx] = h[a], h[a] = idx ++;
+}
+
+int bfs() {
+    int hh = 0, tt = 0;
+    q[0] = 1;
+    
+    memset(d, -1, sizeof d);
+    d[1] = 0;
+    
+    while (hh <= tt) {
+        int t = q[hh ++];
+        
+        for (int i = h[t]; i != -1; i = ne[i]) {
+            int j = e[i];
+            if (d[j] == -1) {
+                d[j] = d[t] + 1;
+                q[++ tt] = j;
+            }
+        }
+    }
+    
+    return d[n];
+}
+
+int main() {
+    memset(h, -1, sizeof h);
+    cin >> n >> m;
+    while (m --) {
+        int a, b;
+        cin >> a >> b;
+        add(a, b);
+    }
+    
+    cout << bfs() << endl;
+    
+    return 0;
+}
+```
+##### BFS框架 （数组模拟队列写法）
+```C++
+#include <iostream>
+#include <algorithm>
+#include <cstring>
+
+using namespace std;
+
+const int N = 100010;
+
+int n, m;
+
+int d[N]; // 每个节点到起点的距离
+int q[N]; // 数组模拟的队列
+
+int bfs() { // 深搜框架 返回起点到某个点的最短距离
+    int hh = 0; // 队头指针
+   	int tt = 0; // 队尾指针
+    
+    q[0] = 1; // 队列初始化 最开始只有起点
+    memset(d, -1, sizeof d); // 距离数组初始化 每一个点到起点的距离最开始都为-1 也就是还不可到达
+    d[1] = 0; // 初始化起点到起点的最短距离为0
+    
+    while (hh <= tt) { // 当队列不为空
+        int t = q[hh ++]; // 取出对头元素
+        
+        for (int i = h[t]; i != -1; i = ne[i]) { // 可以一直往下走 这里为图的遍历
+            int j = e[i]; // 取出当前遍历到的节点
+            if (d[j] == -1) { // 如果当前节点还没有被遍历到
+                d[j] = d[t] + 1; // 就访问这个节点 更新该点到起点的距离
+                q[++ tt] = j; // 将该点入队
+            }
+        }
+    }
+    return d[n]; // 返回n点到起点的距离
+}
+
+int main() {
+    cout << bfs() << endl;
+    return 0;
+}
+```
+#### 拓扑排序
+
+**拓扑序列：对于每条边起点都在终点的前面**
+
+存在**环**就一定不存在拓扑序
+
+*有向无环图*一定存在一个拓扑序列, 所以有向无环图也被成为**拓扑图**
+
+求拓扑序列：一个有向无环图，则至少存在一个入度为0的点
+```C++
+// 伪代码
+将所有入度为0的点入队
+while (队不空) {
+	t = 对头;
+    枚举t的所有出边 j;
+    删掉t->j 的这条边;
+    j的入度 - 1;
+    if (j的入度 == 0) {
+        将j入队;
+    }
+}
+```
+一个有向无环图的拓扑序不唯一
+
+##### 有向图的拓扑序列
+```C++
+#include <iostream>
+#include <algorithm>
+#include <cstring>
+
+using namespace std;
+
+const int N =100010;
+
+int n, m;
+
+int h[N], e[N], ne[N], idx;
+
+int q[N], d[N]; // d保存入度
+
+void add(int a, int b) {
+    e[idx] = b, ne[idx] = h[a], h[a] = idx ++;
+}
+
+bool topsort() {
+    int hh = 0, tt = -1;
+    
+    // 将所有入度为0的点入队
+    for (int i = 1; i <= n; i ++) { // 编号从1~n
+        if(!d[i])
+            q[++ tt] = i;
+    }
+    
+    while (hh <= tt) {
+        int t = q[hh ++];  // 取对头
+        
+        for (int i = h[t]; i != -1; i = ne[i]) { // 遍历出边
+            int j = e[i]; // 取每一条边
+            d[j] -- ; // 删掉t->j的边 将j的入度-1
+            if (d[j] == 0) q[++ t] = j; // 如果j的入度为0 将j入队
+        }
+    }
+    
+    return tt == n - 1; // 如果所有边都入队 则存在拓扑序列
+}
+
+int main () {
+    cin >> n >> m;
+    
+    memset(h, -1, sizeof h);
+    
+    while (m --) {
+        int a, b;
+        cin >>a >> b;
+        add (a, b);
+        d[b] + 1; // 每次插入一条a到b的边 b的入读都+1
+    }
+    
+    if (topsort()) {
+        for (int i = 0; i < n; i ++) printf ("%d ", q[i]);
+        puts("");
+    } else {
+        puts ("-1");
+    }
+    
+    return 0;
+}
+```
+
