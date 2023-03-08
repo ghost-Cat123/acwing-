@@ -869,4 +869,117 @@ int main () {
     return 0;
 }
 ```
+### 基础数据结构
+
+链表 (算法题中一般用静态链表)
+
+数组模拟链表 以及链表基本操作（头插法、插入元素、删除元素）
+```C++
+#include <iostream>
+using namespace std;
+
+const int N = 100010;
+
+// int head; // 表示头节点的下标 指向头节点
+// int e[i]; // 表示节点i的值
+// int ne[i]; // 表示节点i的下一个节点的下标
+// int idx; // 存储当前已经用到的点
+int head, e[N], ne[N], idx;
+
+void init() {
+    head = -1; // 头节点指向空
+    idx = 0; // 表示可以从0号点开始分配
+}
+
+// 将x插入到头节点 头插法
+void add_to_head(int x) {
+    e[idx] = x;
+    ne[idx] = head;
+    head = idx;
+    idx ++;
+}
+
+// 将x插到下标为k的点的下一个点
+void add(int k, int x) {
+    e[idx] = x;
+    ne[idx] = ne[k];
+    ne[k] = idx;
+    idx ++;
+}
+
+// 将下标是k的点后面一个点删除
+void remove(int k) {
+    ne[k] = ne[ne[k]]; // 将k指向k下一个节点的下一个节点
+}
+```
+##### 单链表
+```C++
+#include <iostream>
+using namespace std;
+
+const int N = 100010;
+
+// int head; // 表示头节点的下标 指向头节点
+// int e[i]; // 表示节点i的值
+// int ne[i]; // 表示节点i的下一个节点的下标
+// int idx; // 存储当前已经用到的点
+int head, e[N], ne[N], idx;
+
+int m;
+
+void init() {
+    head = -1; // 头节点指向空
+    idx = 0; // 表示可以从0号点开始分配
+}
+
+// 将x插入到头节点 头插法
+void add_to_head(int x) {
+    e[idx] = x;
+    ne[idx] = head;
+    head = idx ++;
+}
+
+// 将x插到下标为k的点的下一个点
+void add(int k, int x) {
+    e[idx] = x;
+    ne[idx] = ne[k];
+    ne[k] = idx ++;
+}
+
+// 将下标是k的点后面一个点删除
+void remove(int k) {
+    ne[k] = ne[ne[k]]; // 将k指向k下一个节点的下一个节点
+}
+
+int main() {
+    cin >> m;
+    int x, k; // 题目中的k为位序
+    char op;
+    
+    init();
+    
+    while (m --) {
+        cin >> op;
+        
+        if (op == 'H') {
+            cin >> x;
+            add_to_head(x);
+            
+        } else if (op == 'I') {
+            cin >> k >> x;
+            add(k - 1, x);
+            
+        } else {
+            cin >> k;
+            if (!k) head = ne[head];
+            remove(k - 1);
+            
+        }
+    }
+    
+    for (int i = head; i != -1; i = ne[i]) cout << e[i] << " ";
+    cout << endl;
+    return 0;
+}
+```
 
