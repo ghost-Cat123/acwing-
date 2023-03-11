@@ -869,6 +869,80 @@ int main () {
     return 0;
 }
 ```
+
+### 最短路问题
+#### 单源最短路问题
+
+**稀疏图**使用堆优化的dijkstra 
+**稠密图**使用朴素dijkatra
+
+##### 朴素dijkstra
+```
+伪代码：
+dist存储的是最短路径 集合s表示当前已经确定最短路径的点的集合
+    1. 先将dist初始化为1 
+    2. 将起点到起点的最短路径设置为0
+    3. 循环所有边
+        1. 找到不在s中的距离最近的点 t
+        2. 将t加入集合s
+        3. 使用t更新其它点的距离(用1到t的长度 + t到j的长度 来更新1到j的长度)
+```
+`代码模板`
+```C++
+#include <iostream>
+#include <cstring>
+
+using namespace std;
+
+const int N = 510;
+
+int n, m;
+int g[N][N]; // 邻接矩阵 存储稠密图
+int dist[N]; // 用于dijkstra所求得的最短路径
+int st[N]; // 用于判断当前点是否被访问
+
+int dijkstra() {
+    
+    memset(dist, 0x3f, sizeof dist); // 初始化所有边的最路径
+    dist[1] = 0; // 表示起点也就是1号点到1号点的最短路径为0
+    
+    for (int i = 0; i < n; i ++) { // 遍历每条边 
+        int t = -1;
+        for (int j = 1; j <= n; j ++) {
+            if (!st[j] && (t == -1 || dist[t] > dist[j])) // 没有确定最短路径的点中，最短的路径
+                t = j; // 将t的值更新为j
+        }
+        
+        st[t] = true;
+        
+        // 用t更新其他点的距离
+        for (int j = 1; j <= n; j ++) 
+            dist[j] = min(dist[j], dist[t] + g[t][j]); // 用1到t的长度 + t到j的长度 来更新1到j的长度
+    }
+    
+    if (dist[n] == 0x3f3f3f3f) return -1; // 1和n是不连通的
+    return dist[n];
+}
+
+int main() {
+    scanf("%d%d", &n, &m);
+    
+    memset(g, 0x3f, sizeof g);
+    
+    while (m --) {
+        int a, b, c;
+        scanf ("%d%d%d", &a, &b, &c);
+        g[a][b] = min(g[a][b], c); // 存在重边，需要在多条边中取最小值 
+    }
+    
+    int t = dijkstra();
+    
+    printf ("%d", t);
+    
+    return 0;
+}
+```
+
 ### 基础数据结构
 
 链表 (算法题中一般用静态链表)
