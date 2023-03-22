@@ -178,5 +178,121 @@ int main() {
 ```
 ### 多重背包问题
 特点：每件物品数量不同
+状态转移方程(和完全背包问题类似)：
+
+`f(i, j) = Max(f(i - 1, j), f(i - 1, j - k * v[i]) + k * w[i]) k = 0、1、2……s[i]`
+
+朴素做法O(n^3)(数据大于1000会TLE)：
+```C++
+#include <iostream>
+using namespace std;
+
+const int N = 110;
+
+int n, m;
+int v[N], w[N], s[N];
+int f[N][N];
+
+int main() {
+    cin >> n >> m;
+    
+    for (int i = 1; i <= n; i ++) cin >> v[i] >> w[i] >> s[i];
+    
+    for (int i = 1; i <= n; i ++)
+        for (int j = 0; j <= m; j ++)
+            for (int k = 0; k <= s[i] && k * v[i] <= j; k ++) { // 枚举每件物品的个数
+                f[i][j] = max(f[i][j], f[i - 1][j - k * v[i]] + w[i] * k);
+            }
+            
+    cout << f[n][m];
+    
+    return 0;
+}
+```
+二进制优化O(n * m * logn) **将s件物品拆分成logs组物品，每一组选或不选**:
+```C++
+#include <iostream>
+using namespace std;
+
+const int N = 25000; // 一共2000件物品，每种物品拆分成logn组，一共25000个物品
+int n, m;
+int v[N], w[N], s[N];
+int f[N];
+
+int main() {
+    cin >> n >> m;
+    
+    int cnt = 0;
+    for (int i = 1; i <= n; i ++) {
+        int a, b, s;
+        cin >> a >> b >> s;
+        
+        // 开始拆分
+        int k = 1;
+        while (k <= s) { // k = 1、2、4、6、8、16、2^n;
+            cnt ++;
+            v[cnt] = k * a; // 每一组的体积
+            w[cnt] = k * b; // 每一组的价值
+            s -= k;
+            k *= 2;
+        }
+        if (s > 0) { // 还没有分完 将剩下的全部作为1组
+            cnt ++;
+            v[cnt] = s * a;
+            w[cnt] = s * b;
+        }
+    }
+    
+    n = cnt; // 更新物品数量为组的数量
+    
+    // 多重背包变为了01背包问题 每一组选或不选
+    // 一维数组优化
+    for (int i = 1; i <= n; i ++)
+        for (int j = m; j >= v[i]; j --)
+            f[j] = max(f[j], f[j - v[i]] + w[i]);
+            
+    cout << f[m] << endl;
+    
+    return 0;
+}
+```
+
 ### 分组背包问题
 特点：物品有n组，每组有若干种，每一组只能选一种
+
+集合划分：
+不选第i组的物品：f(i-1, j)
+选第i组中的第k个物品：f(i-1, j-v\[i,k\]+w\[i,k\])
+
+代码：
+```C++
+#include <iostream>
+using namespace std;
+
+const int N = 110;
+
+int n, m;
+int v[N][N], w[N][N], s[N];
+int f[N];
+
+int main() {
+    cin >> n >> m;
+    
+    for (int i = 1; i <= n; i ++) {
+        cin >> s[i];
+        for (int j = 0; j < s[i]; j ++) {
+            cin >> v[i][j] >> w[i][j];
+        }
+    }
+    
+    for (int i = 1; i <= n; i ++)
+        for (int j = m; j >= 0; j --)  // 需要用到上一层 j从大到小枚举 
+            for (int k = 0; k < s[i]; k ++)
+                if (v[i][k] <= j) // 第i组物品中第k个物品的体积 小于当前背包容量
+                    f[j] = max(f[j], f[j - v[i][k]] + w[i][k]); // 同01背包问题
+    
+    cout << f[m] <<endl;
+    
+    return 0;
+}
+```
