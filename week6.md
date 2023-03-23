@@ -19,6 +19,7 @@ Dp
     2. 包含i f(i,j)=f(i-1,j-vi)+wi
   * 问题的解就为**Max(f(i-1,j),f(i-1,j-vi)+wi)**
 #### 01背包问题
+特点：每件物品最多用一次(选或不选)
 朴素二维数组做法：
 ```C++
 #include <iostream>
@@ -75,7 +76,7 @@ int main() {
     return 0;
 }
 ```
-特点：每件物品最多用一次(选或不选)
+
 ### 完全背包问题
 特点：每件物品可以用多次
 分析方法同01背包问题
@@ -176,6 +177,92 @@ int main() {
     return 0;
 }
 ```
+例题：
+整数拆分：
+该问题可以转化为完全背包问题
+整数n就为背包容量
+没一个2的次幂就是一个物品，数值就是体积，每个物品都有无限个
+2^0 v=1
+2^1 v=2
+2^2 v=4
+……  ……
+集合：从前i个物品中选，且总体积恰好等于j的所有方案的集合
+
+二维版本(会MLE)
+```C++
+#include <iostream>
+using namespace std;
+
+const int N = 21, M = 1000010, MOD = 1e9;
+
+int m; // 体积
+int f[N][N];
+
+int main() {
+    scanf("%d", &m);
+    
+    f[0][0] = 1;
+    
+    int n = 0; // 定义物品数量
+    
+    for (int i = 1, v = 1; v <= m; i ++, v *= 2) { // v为当前体积
+        n ++;
+        for (int j = 0; j <= m; j ++) {
+            f[i][j] = f[i - 1][j]; // 不选第i个物品
+            if (j >= v) f[i][j] = (f[i][j] + f[i][j - v]) % MOD;
+        } 
+    }
+    
+    printf ("%d", f[n][m]);
+    
+    return 0;
+}
+```
+
+一维优化版本：
+```C++
+#include <iostream>
+using namespace std;
+
+const int N = 21, M = 1000010, MOD = 1e9;
+
+int m; // 体积
+int f[M];
+
+int main() {
+    scanf("%d", &m);
+    
+    f[0] = 1;
+    
+    int n = 0; // 定义物品数量
+    
+    for (int i = 1, v = 1; v <= m; i ++, v *= 2) { // v为当前体积
+        n ++;
+        for (int j = v; j <= m; j ++) f[j] = (f[j] + f[j - v]) % MOD;
+    }
+    
+    printf ("%d\n", f[m]);
+    
+    return 0;
+}
+```
+注意：
+一维：
+` for (int i = 1, v = 1; v <= m; i ++, v *= 2) { // v为当前体积
+        n ++;
+        for (int j = v; j <= m; j ++) f[j] = (f[j] + f[j - v]) % MOD;
+    }
+ `
+ 二维:
+ `
+ for (int j = 0; j <= m; j ++) {
+            f[i][j] = f[i - 1][j]; // 不选第i个物品
+            if (j >= v) f[i][j] = (f[i][j] + f[i][j - v]) % MOD;
+        } 
+`
+由于在算`f[j] = (f[j] + f[j - v]) % MOD;`时右边的f\[j\]还没有被算过所以还是上一层的f\[i-1\]\[j\]，
+f\[j - v\]由于是从小到大枚举j所以f\[j - v\]在f\[j\]之前以及被算过所以算的是f\[i\]\[j\]符合状态转移方程
+
 ### 多重背包问题
 特点：每件物品数量不同
 状态转移方程(和完全背包问题类似)：
