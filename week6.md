@@ -234,12 +234,8 @@ int main() {
     
     f[0] = 1;
     
-    int n = 0; // 定义物品数量
-    
-    for (int i = 1, v = 1; v <= m; i ++, v *= 2) { // v为当前体积
-        n ++;
-        for (int j = v; j <= m; j ++) f[j] = (f[j] + f[j - v]) % MOD;
-    }
+    for (int i = 1; i <= m; i *= 2)  // v为当前体积
+        for (int j = i; j <= m; j ++) f[j] = (f[j] + f[j - i]) % MOD;
     
     printf ("%d\n", f[m]);
     
@@ -383,3 +379,44 @@ int main() {
     return 0;
 }
 ```
+## 线性DP
+### 数字三角形
+```C++
+#include <iostream>
+using namespace std;
+
+const int N = 510, INF = 1e9;
+
+int n;
+int a[N][N];
+int f[N][N]; // f[i][j] 表示从起点开始到a[i][j]的路径的集合
+
+int main() {
+    scanf ("%d", &n);
+    
+    for (int i = 1; i <= n; i ++)
+        for (int j = 1; j <= i; j ++)
+            scanf ("%d", &a[i][j]);
+            
+    // 初始化集合
+    for (int i = 0; i <= n; i ++)
+        for (int j = 0; j <= i + 1; j ++) 
+            f[i][j] = -INF;
+            
+    f[1][1] = a[1][1]; // 第1个点到起点的路径就是他自己
+    
+    // 状态计算
+    for (int i = 2; i <= n; i ++) // f[1][1]已经算过 从f[2][j]开始计算
+        for (int j = 1; j <= i; j ++) 
+            f[i][j] = max(f[i - 1][j - 1] + a[i][j], f[i - 1][j] + a[i][j]);
+    
+    int res = -INF;
+    
+    for (int i = 1; i <= n; i ++) res = max(res, f[n][i]);
+    
+    printf ("%d", res);
+    
+    return 0;
+}
+```
+
